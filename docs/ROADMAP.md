@@ -1,6 +1,6 @@
 # ai-proxy: SRE ポートフォリオ開発計画
 
-更新日: 2026-09-23 / 状態: 計画段階。M0〜M7 はすべて未着手。
+更新日: 2026-09-23 / 状態: M0 を実装・検証中。M1〜M7 は未着手。
 
 ## 目的と完成像
 
@@ -143,7 +143,7 @@ Argo Rollouts の安定版復帰は Git を書き戻さない。自動復旧の�
 | M1-02 | 認証、制限、キャンセル、終了処理 | slow reader、途中切断、終了中の受付を含むテスト |
 | M1-03 | メトリクス、トレース、ダッシュボード | 1要求の完了状態と upstream 試行を照合可能 |
 
-この表はローカルの登録案。GitHub の Issues/Milestones/ブランチ保護は M0 の実装作業で具体化する。必須チェックは実際の job 名に合わせ、一人開発で承認者不在のままマージ不能になる設定を避ける。
+GitHub に [M0〜M7 の Milestones](https://github.com/jun122277/ai-proxy/milestones) と [開発 Issues](https://github.com/jun122277/ai-proxy/issues) を登録済み。ブランチ保護の必須チェックは実際の job 名に合わせ、一人開発で承認者不在のままマージ不能になる設定を避ける。
 
 CI の action は検証済み commit に固定し、通常 PR は最小権限で実行する。GHCR への書込み権限はリリース job に限定する。イメージは digest とソース commit を対応づける。scan の例外には理由と期限を残し、実行していない coverage/security バッジを掲載しない。
 
