@@ -2,7 +2,9 @@
 
 外部 API の障害と長寿命の Streaming 接続を題材に、信頼性の設計・計測・障害対応・安全なリリースを実証する SRE ポートフォリオ。
 
-M0 の基盤を実装・検証済みです。現在は設定検証と HTTP プロセスのヘルスチェックまで動作します。LLM プロキシ、認証、SSE、`/readyz` は M1 で追加します。
+M0 の基盤を実装・検証済みです。gateway は設定検証と HTTP プロセスのヘルスチェックまで動作します。gateway の LLM 中継、認証、SSE、`/readyz` は M1 で追加します。
+
+M1-01 のモック upstream と公式 SDK 契約テストを追加しました。次は **自分で行う M1-02 の通信制御**です。[着手手順と実験メモ](docs/exercises/m1-lifecycle.md) から始めてください。
 
 実装範囲とデモの合格条件は [ロードマップ](docs/ROADMAP.md)、初期判断は [ADR-0001](docs/adr/0001-sre-portfolio-scope.md) を参照してください。
 
@@ -42,6 +44,18 @@ make run
 
 イメージは digest、CI action は commit に固定しています。実 API の呼び出しや API キーは不要です。[M0 の検証記録](docs/reports/m0-validation.md) も参照してください。
 
+## M1 の練習環境
+
+```sh
+docker compose -f deploy/compose/compose.yaml --profile mock up --build -d --wait gateway mockllm
+```
+
+モックは `http://127.0.0.1:9090/v1/chat/completions` で固定の通常/SSE 応答を返します。`MOCK_FIRST_EVENT_DELAY` と `MOCK_CHUNK_INTERVAL` で遅延を変更できます。[API 契約](docs/api-contract.md) と [PowerShell での実験手順](docs/exercises/m1-lifecycle.md) を参照してください。
+
+`make check` には公式 OpenAI Go SDK v3.66.0 のローカル契約テストも含まれます。`make test-sdk` で個別に実行できます。実モデルの生成、tokenizer、gateway 経由の中継を検証したものではありません。
+
+終了は `docker compose -f deploy/compose/compose.yaml --profile mock down --remove-orphans`、または `make down` です。
+
 ## Actions の使用量を抑える運用
 
 [GitHub Actions](https://github.com/jun122277/ai-proxy/actions/workflows/ci.yml) は、Draft PR をレビュー可能にする操作と明示的な手動実行に限定します。push、PR 作成・更新、main への取り込み、定期スケジュールでは実行しません。通常の検証はローカルで済ませ、最終 commit を push してから Draft を解除すると Go チェックが1回実行されます。
@@ -79,7 +93,8 @@ SIGTERM/割込み時は受付を停止し、処理中の要求を `shutdown_time
 | 段階 | 状態 |
 | --- | --- |
 | M0 Go・コンテナ・CI・開発運用 | 実装・検証済み |
-| M1 プロキシと可観測性 | 未着手 |
+| M1-01 モック upstream と SDK 契約 | 準備済み |
+| M1-02 通信制御 / M1-03 可観測性 | 利用者が担当・未着手 |
 | M2〜M7 SLO・障害対応・Kubernetes・GitOps | 未着手 |
 
 [Milestones](https://github.com/jun122277/ai-proxy/milestones) / [Issues](https://github.com/jun122277/ai-proxy/issues) / [開発手順](CONTRIBUTING.md) / [セキュリティ報告](SECURITY.md) / [MIT License](LICENSE)
