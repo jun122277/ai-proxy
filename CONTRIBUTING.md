@@ -4,7 +4,9 @@
 
 コミットは `feat:`, `fix:`, `test:`, `docs:`, `ci:`, `chore:` を使い、何が変わるかを短く説明します。設計上の選択には ADR、運用上の症状には Runbook、障害演習には実際に得た記録を添えます。
 
-実装の PR では README の開発コマンドをローカルで実行し、結果を記載します。Actions の使用量を抑えるため、CI は手動実行のみです。PR の最終 commit に対して `gh workflow run ci.yml --ref <branch>` を1回実行し、main へのマージには `Go checks` の成功を必須にします。push と PR 更新時の自動実行はありません。
+実装の PR では README の開発コマンドをローカルで実行し、結果を記載します。Actions の使用量を抑えるため、PR は Draft で作成し、最終 commit を push した後に `gh pr ready <番号>` で Draft を解除します。この操作で Go チェックを1回実行し、main へのマージには成功を必須にします。push と PR 作成・更新時の自動実行はありません。
+
+検証後に commit を追加した場合は `gh pr ready <番号> --undo` で Draft に戻し、再度 ready にして新しい commit を検証します。`workflow_dispatch` の結果は PR の必須チェックには認められないため、Draft 解除を起点とするチェックを省略しないでください。
 
 コンテナと脆弱性検査はローカルで実行します。必要な場合だけ `-f full=true` でリモートのフル CI を選びます。任意の `Container checks` はブランチ保護の必須チェックには含めません。検査で失敗した場合は修正し、失敗を隠すための skip は追加しません。例外が必要な場合は理由、影響、期限、対応 Issue を記録します。
 

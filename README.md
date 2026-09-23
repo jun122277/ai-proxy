@@ -44,13 +44,17 @@ make run
 
 ## Actions の使用量を抑える運用
 
-[GitHub Actions](https://github.com/jun122277/ai-proxy/actions/workflows/ci.yml) は手動実行のみです。push、PR 更新、main への取り込み、定期スケジュールでは実行しません。通常の検証はローカルで済ませ、PR の最終 commit に対して Go チェックを1回実行します。実行後に commit を追加した場合は、その新しい commit のチェックが必要です。
+[GitHub Actions](https://github.com/jun122277/ai-proxy/actions/workflows/ci.yml) は、Draft PR をレビュー可能にする操作と明示的な手動実行に限定します。push、PR 作成・更新、main への取り込み、定期スケジュールでは実行しません。通常の検証はローカルで済ませ、最終 commit を push してから Draft を解除すると Go チェックが1回実行されます。
 
 ```sh
-gh workflow run ci.yml --ref <PRのブランチ名>
+gh pr create --draft
+# ローカルで検証し、最終 commit を push した後:
+gh pr ready <PR番号>
 ```
 
-既定は format/vet、race test、build、設定例の確認で、1ジョブ・最大5分です。main の必須チェックは `Go checks` とし、コンテナと脆弱性検査はローカルの結果を PR に記録します。必要な場合だけ次のフル CI を明示的に実行します。
+既定は format/vet、race test、build、設定例の確認で、1ジョブ・最大5分です。main の必須チェックは `Go checks` とし、コンテナと脆弱性検査はローカルの結果を PR に記録します。CI 後に commit を追加した場合は `gh pr ready <PR番号> --undo` で Draft に戻し、改めて `gh pr ready <PR番号>` を実行します。
+
+必要な場合だけ次のフル CI を明示的に実行します。`workflow_dispatch` の結果は GitHub の仕様上 PR の必須チェックに使えないため、Draft 解除によるチェックの代わりにはしません。
 
 ```sh
 gh workflow run ci.yml --ref <PRのブランチ名> -f full=true
