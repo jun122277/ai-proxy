@@ -1,0 +1,20 @@
+name: Bug report
+description: 再現情報を添えた不具合報告
+body:
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 再現手順
+      description: commit、環境、合成データによる手順。秘密や実プロンプトは記載しないでください。
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 期待する挙動と実際の挙動
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影響・緩和策・関連する観測結果

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security report
+    url: https://github.com/jun122277/ai-proxy/security/advisories/new
+    about: セキュリティ上の問題は非公開で報告してください。
