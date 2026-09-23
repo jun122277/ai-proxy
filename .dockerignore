@@ -4,6 +4,7 @@
 !cmd/**
 !internal/**
 !config/**
+!tests/**
 !Dockerfile
 !LICENSE
 **/*.local.json
