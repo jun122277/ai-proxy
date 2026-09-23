@@ -1,0 +1,20 @@
+name: Development task
+description: 受け入れ条件を持つ小さな開発タスク
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 問題と目標
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 受け入れ条件
+      description: 挙動と検証方法を記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依存する Issue・ADR・Milestone
