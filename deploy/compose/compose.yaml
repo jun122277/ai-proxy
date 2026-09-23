@@ -1,0 +1,41 @@
+name: ai-proxy
+
+services:
+  gateway:
+    image: ai-proxy:dev
+    build:
+      context: ../..
+      target: runtime
+    ports:
+      - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 1
+    environment:
+      GOMEMLIMIT: 96MiB
+    stop_grace_period: 15s
+    healthcheck:
+      test: [CMD, /gateway, -config, /etc/ai-proxy/gateway.json, -healthcheck]
+      interval: 5s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+
+  dev:
+    profiles: [tools]
+    build:
+      context: ../..
+      target: development
+    working_dir: /src
+    volumes:
+      - ../..:/src
+      - go-modules:/go/pkg/mod
+      - go-build:/root/.cache/go-build
+    command: [make, check]
+
+volumes:
+  go-modules:
+  go-build:

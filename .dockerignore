@@ -1,0 +1,9 @@
+**
+!go.mod
+!Makefile
+!cmd/**
+!internal/**
+!config/**
+!Dockerfile
+!LICENSE
+**/*.local.json
