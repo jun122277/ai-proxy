@@ -1,0 +1,8 @@
+/bin/
+/.local/
+/test-results/
+/.env
+/.env.*
+!/.env.example
+*.local.json
+coverage.out
