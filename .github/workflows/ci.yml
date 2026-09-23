@@ -2,9 +2,13 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches: [main]
+    types: [ready_for_review]
   workflow_dispatch:
+    inputs:
+      full:
+        description: Also run Go vulnerability and container checks (uses more runner time)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -17,7 +21,7 @@ jobs:
   go:
     name: Go checks
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -28,13 +32,15 @@ jobs:
           cache: false
       - run: make check
       - run: make vuln
+        if: inputs.full
       - name: Check example configuration
         run: ./bin/gateway -config config/gateway.example.json -check-config
 
   container:
     name: Container checks
+    if: inputs.full
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

@@ -2,7 +2,7 @@
 
 外部 API の障害と長寿命の Streaming 接続を題材に、信頼性の設計・計測・障害対応・安全なリリースを実証する SRE ポートフォリオ。
 
-M0 の基盤を実装しています。現在は設定検証と HTTP プロセスのヘルスチェックまで動作します。LLM プロキシ、認証、SSE、`/readyz` は M1 で追加します。
+M0 の基盤を実装・検証済みです。現在は設定検証と HTTP プロセスのヘルスチェックまで動作します。LLM プロキシ、認証、SSE、`/readyz` は M1 で追加します。
 
 実装範囲とデモの合格条件は [ロードマップ](docs/ROADMAP.md)、初期判断は [ADR-0001](docs/adr/0001-sre-portfolio-scope.md) を参照してください。
 
@@ -40,7 +40,27 @@ make run
 
 整形は `make fmt`、実行イメージの HIGH/CRITICAL 脆弱性検査は `make scan` です。`make scan` には Docker とネットワーク接続が必要です。開発用コンテナには Docker ソケットを渡していないため、`make up` / `make scan` はホストまたは CI で実行してください。
 
-CI は [GitHub Actions](https://github.com/jun122277/ai-proxy/actions/workflows/ci.yml) で Go とコンテナの検証を行います。イメージは digest、CI action は commit に固定しています。実 API の呼び出しや API キーは不要です。[M0 のローカル検証記録](docs/reports/m0-validation.md) も参照してください。
+イメージは digest、CI action は commit に固定しています。実 API の呼び出しや API キーは不要です。[M0 の検証記録](docs/reports/m0-validation.md) も参照してください。
+
+## Actions の使用量を抑える運用
+
+[GitHub Actions](https://github.com/jun122277/ai-proxy/actions/workflows/ci.yml) は、Draft PR をレビュー可能にする操作と明示的な手動実行に限定します。push、PR 作成・更新、main への取り込み、定期スケジュールでは実行しません。通常の検証はローカルで済ませ、最終 commit を push してから Draft を解除すると Go チェックが1回実行されます。
+
+```sh
+gh pr create --draft
+# ローカルで検証し、最終 commit を push した後:
+gh pr ready <PR番号>
+```
+
+既定は format/vet、race test、build、設定例の確認で、1ジョブ・最大5分です。main の必須チェックは `Go checks` とし、コンテナと脆弱性検査はローカルの結果を PR に記録します。CI 後に commit を追加した場合は `gh pr ready <PR番号> --undo` で Draft に戻し、改めて `gh pr ready <PR番号>` を実行します。
+
+必要な場合だけ次のフル CI を明示的に実行します。`workflow_dispatch` の結果は GitHub の仕様上 PR の必須チェックに使えないため、Draft 解除によるチェックの代わりにはしません。
+
+```sh
+gh workflow run ci.yml --ref <PRのブランチ名> -f full=true
+```
+
+フル CI では govulncheck とコンテナ検査・Trivy を追加し、コンテナ側の上限は10分です。上限時間は最大値であり、実行時間や料金の見積もりではありません。初回のフル検証は [実行記録](https://github.com/jun122277/ai-proxy/actions/runs/35861371164) に残しています。
 
 ## 設定と終了処理
 
@@ -58,7 +78,7 @@ SIGTERM/割込み時は受付を停止し、処理中の要求を `shutdown_time
 
 | 段階 | 状態 |
 | --- | --- |
-| M0 Go・コンテナ・CI・開発運用 | 実装・検証中 |
+| M0 Go・コンテナ・CI・開発運用 | 実装・検証済み |
 | M1 プロキシと可観測性 | 未着手 |
 | M2〜M7 SLO・障害対応・Kubernetes・GitOps | 未着手 |
 

@@ -1,4 +1,4 @@
-# M0 ローカル検証記録
+# M0 検証記録
 
 実施日: 2026-09-23。M0 のプロセス基盤を対象とする。SSE、可用性 SLO、実 API、Kubernetes は未検証。
 
@@ -32,7 +32,15 @@
 | Trivy runtime image scan | Debian/Go binary とも HIGH/CRITICAL の検出0件 |
 | 設定例の `-check-config` | 終了コード0 |
 
-再現コマンドは [README](../../README.md)、Linux で同じチェックを行う定義は [CI](../../.github/workflows/ci.yml) に置く。GitHub 実行結果は [Actions](https://github.com/jun122277/ai-proxy/actions/workflows/ci.yml) と該当実装 PR の Checks から commit と照合する。
+再現コマンドは [README](../../README.md)、Linux で同じチェックを行う定義は [CI](../../.github/workflows/ci.yml) に置く。
+
+## GitHub Actions
+
+[初回のフル CI](https://github.com/jun122277/ai-proxy/actions/runs/35861371164) は commit `cfaa169b546cb9119062b419775bac584d618196` に対して成功した。Go checks と Container checks の両方を含む。対象の実装は [PR #16](https://github.com/jun122277/ai-proxy/pull/16) から追跡できる。
+
+以降は利用枠を節約するため、Draft PR の解除時だけ必須の Go チェックを実行する。フル CI は明示的な `full=true` 指定時に限る。push、PR 作成・更新、main への取り込みで自動実行しない。
+
+`workflow_dispatch` だけの案も [手動実行](https://github.com/jun122277/ai-proxy/actions/runs/35861885043) では成功したが、PR の必須チェックを満たせなかった。公式仕様を確認し、必須チェックは `pull_request` の `ready_for_review` を起点とする方式に修正した。詳細は [ADR-0002](../adr/0002-actions-budget.md) を参照。
 
 ## 検証中に見つかった問題
 
